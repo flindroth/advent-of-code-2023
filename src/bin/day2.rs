@@ -34,19 +34,23 @@ enum Color {
 fn parse_games(input: &Vec<String>) -> Vec<Game> {
     let mut games: Vec<Game> = vec![];
     for line in input {
-        let game_nr_str = line
+        let game_nr = str::parse::<u32>(
+            line
             .split(":").next().unwrap()
-            .split(" ").skip(1).next().unwrap();
-        let game_nr = str::parse::<u32>(game_nr_str).unwrap();
-        let picks_str = line.split(":").skip(1).next().unwrap().trim();
-        let groups_strs = picks_str.split(";");
+            .split(" ").skip(1).next().unwrap()
+        ).unwrap();
+        let groups_str = line.split(":")
+            .skip(1)
+            .next()
+            .unwrap()
+            .trim().
+            split(";");
         let mut groups: Vec<Vec<(Color, u32)>> = vec![];
-        for group_str in groups_strs {
+        for group_str in groups_str {
             let mut curr_group: Vec<(Color, u32)> = vec![];
             let picks_str = group_str.split(",");
             for pick_str in picks_str {
-                let trimmed = pick_str.trim();
-                let mut pick_components = trimmed.split(" ");
+                let mut pick_components = pick_str.trim().split(" ");
                 let amount = str::parse::<u32>(pick_components.next().unwrap()).unwrap();
                 let color = match pick_components.next().unwrap() {
                     "red" => Color::Red,
