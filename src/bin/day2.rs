@@ -34,14 +34,13 @@ enum Color {
 fn parse_games(input: &Vec<String>) -> Vec<Game> {
     let mut games: Vec<Game> = vec![];
     for line in input {
+        let mut line_colon_split = line.split(":");
         let game_nr = str::parse::<u32>(
-            line
-            .split(":").next().unwrap()
+            line_colon_split.next().unwrap()
             .split(" ").skip(1).next().unwrap()
         ).unwrap();
-        let groups_str = line.split(":")
-            .skip(1)
-            .next()
+        let groups_str = 
+            line_colon_split.next()
             .unwrap()
             .trim().
             split(";");
