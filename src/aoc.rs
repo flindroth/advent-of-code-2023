@@ -1,4 +1,7 @@
-use std::{io::{BufRead, BufReader, LineWriter, Write}, path::Path};
+use std::{
+    io::{BufRead, BufReader, LineWriter, Write},
+    path::Path,
+};
 
 use reqwest::StatusCode;
 
@@ -20,7 +23,8 @@ pub fn get_input_from_http_and_cache(year: i32, day: i32) -> Result<Vec<String>,
     let url = format!("https://adventofcode.com/{year}/day/{day}/input");
 
     let client = reqwest::blocking::Client::new();
-    let resp = client.get(url)
+    let resp = client
+        .get(url)
         .header("Cookie", format!("session={}", session_cookie))
         .send()?;
 
@@ -63,7 +67,7 @@ fn write_lines_to_cache(year: i32, day: i32, lines: &Vec<String>) -> Result<(), 
 #[derive(Debug)]
 pub enum AocError {
     NotFound,
-    IoError
+    IoError,
 }
 
 impl From<reqwest::Error> for AocError {
