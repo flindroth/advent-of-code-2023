@@ -7,6 +7,15 @@ fn main() {
         .fold(0, |acc, x| acc + x.number);
 
     println!("Star 1: {possible_sum}");
+
+    let power_sum: u32 = games.iter()
+        .map(|game| { 
+            let (red, green, blue) = minimum_cube_count(game);
+            red * green * blue
+        })
+        .fold(0, |acc, x| acc + x);
+
+    println!("Star 2: {power_sum}");
 }
 
 #[derive(Debug)]
@@ -67,4 +76,34 @@ fn game_is_possible(game: &Game, max_red: u32, max_green: u32, max_blue: u32) ->
         } 
     }
     true
+}
+
+fn minimum_cube_count(game: &Game) -> (u32, u32, u32) {
+    let mut red = 0;
+    let mut green = 0;
+    let mut blue = 0;
+
+    for group in &game.pick_groups {
+        for pick in group {
+            match pick.0 {
+                Color::Red => {
+                    if pick.1 > red {
+                        red = pick.1;
+                    }
+                },
+                Color::Green => {
+                    if pick.1 > green {
+                        green = pick.1;
+                    }
+                },
+                Color::Blue => {
+                    if pick.1 > blue {
+                        blue = pick.1;
+                    }
+                }
+            }
+        } 
+    }
+
+    (red, green, blue)
 }
