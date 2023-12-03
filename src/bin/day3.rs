@@ -1,5 +1,4 @@
-use core::num;
-use std::{collections::{HashSet, HashMap}, str::Chars};
+use std::collections::{HashSet, HashMap};
 
 use aoc_2023::aoc;
 
