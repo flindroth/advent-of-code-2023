@@ -169,15 +169,6 @@ fn update_gear_ratios(
         Some((0, 0)) => (add_value, 0),
         Some((left, 0)) => (*left, add_value),
         Some((left, right)) => (*left, *right),
-        /*
-        Some((left, _)) => {
-            if *left == 0 {
-                (add_value, 0)
-            } else {
-                (*left, add_value)
-            }
-        }
-        */
         None => (add_value, 0),
     };
     gear_map.insert(*gear_coords, new_ratio);
