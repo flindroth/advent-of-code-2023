@@ -1,4 +1,4 @@
-use std::collections::{HashSet, HashMap};
+use std::collections::{HashMap, HashSet};
 
 use aoc_2023::aoc;
 
@@ -8,9 +8,7 @@ fn main() {
     let symbols = parse_symbols(&input);
     let (part_numbers, ratios) = parse_part_numbers_and_ratios(&input, &symbols);
 
-    let part_number_sum = part_numbers
-        .iter()
-        .fold(0, |acc, x| acc + x);
+    let part_number_sum = part_numbers.iter().fold(0, |acc, x| acc + x);
 
     println!("Star 1: {part_number_sum}");
 
@@ -20,11 +18,12 @@ fn main() {
 }
 
 type SymbolMap = HashMap<(usize, usize), char>;
+type GearRatioMap = HashMap<(usize, usize), (u32, u32)>;
 
 fn parse_part_numbers_and_ratios(input: &Vec<String>, symbols: &SymbolMap) -> (Vec<u32>, Vec<u32>) {
     let mut part_numbers: Vec<u32> = vec![];
     let mut row_num: usize = 0;
-    let mut gear_ratios: HashMap<(usize, usize), (u32, u32)> = HashMap::new();
+    let mut gear_ratios: GearRatioMap = HashMap::new();
     for row in input {
         let mut num_start: Option<usize> = None;
         for (idx, c) in row.char_indices() {
@@ -36,30 +35,12 @@ fn parse_part_numbers_and_ratios(input: &Vec<String>, symbols: &SymbolMap) -> (V
             }
             // No longer a number
             if let Some(start) = num_start {
-                let (part_number, gear_coords) = is_part_number((start, idx), row_num, symbols);
-                if part_number {
-                    let num_str = &row[start..idx];
-                    let num = str::parse::<u32>(num_str).unwrap();
-                    part_numbers.push(num);
-
-                    for coords in gear_coords {
-                        update_gear_ratios(&mut gear_ratios, &coords, num);
-                     }
-                }
+                handle_number_substring(&mut gear_ratios, &mut part_numbers, row, row_num, symbols, (start, idx))
             }
             num_start = None;
         }
         if let Some(start) = num_start {
-            let (part_number, gear_coords) = is_part_number((start, row.len()), row_num, symbols);
-            if part_number {
-                let num_str = &row[start..row.len()];
-                let num = str::parse::<u32>(num_str).unwrap();
-                part_numbers.push(num);
-            
-                for coords in gear_coords {
-                   update_gear_ratios(&mut gear_ratios, &coords, num);
-                }
-            }
+            handle_number_substring(&mut gear_ratios, &mut part_numbers, row, row_num, symbols, (start, row.len()));
         }
         row_num += 1;
     }
@@ -70,8 +51,32 @@ fn parse_part_numbers_and_ratios(input: &Vec<String>, symbols: &SymbolMap) -> (V
     (part_numbers, ratio_vec)
 }
 
-fn is_part_number(num_start_end: (usize, usize), row_num: usize, symbols: &SymbolMap) -> (bool, HashSet<(usize, usize)>) {
-    
+fn handle_number_substring(
+    gear_ratios: &mut GearRatioMap,
+    part_numbers: &mut Vec<u32>,
+    row: &String,
+    row_number: usize,
+    symbol_map: &SymbolMap,
+    num_start_end: (usize, usize),
+) {
+    let (part_number, gear_coords) =
+        is_part_number((num_start_end.0, num_start_end.1), row_number, symbol_map);
+    if part_number {
+        let num_str = &row[num_start_end.0..num_start_end.1];
+        let num = str::parse::<u32>(num_str).unwrap();
+        part_numbers.push(num);
+
+        for coords in gear_coords {
+            update_gear_ratios(gear_ratios, &coords, num);
+        }
+    }
+}
+
+fn is_part_number(
+    num_start_end: (usize, usize),
+    row_num: usize,
+    symbols: &SymbolMap,
+) -> (bool, HashSet<(usize, usize)>) {
     let mut gear_coords: HashSet<(usize, usize)> = HashSet::new();
     let mut part_number = false;
 
@@ -92,7 +97,6 @@ fn is_part_number(num_start_end: (usize, usize), row_num: usize, symbols: &Symbo
     }
 
     (part_number, gear_coords)
-    
 }
 
 fn get_adjacent_symbols(coords: (usize, usize), symbols: &SymbolMap) -> HashSet<(usize, usize)> {
@@ -100,20 +104,20 @@ fn get_adjacent_symbols(coords: (usize, usize), symbols: &SymbolMap) -> HashSet<
     let col = coords.1;
     let mut symbol_locations: HashSet<(usize, usize)> = HashSet::new();
 
-    let mut checks: Vec<(usize, usize)> = vec![(row, col+1),(row+1, col), (row+1,col+1)];
+    let mut checks: Vec<(usize, usize)> = vec![(row, col + 1), (row + 1, col), (row + 1, col + 1)];
 
     if row > 0 {
-        checks.push((row-1, col));
-        checks.push((row-1, col+1));
+        checks.push((row - 1, col));
+        checks.push((row - 1, col + 1));
         if col > 0 {
-            checks.push((row-1, col-1));
-            checks.push((row, col-1));
-            checks.push((row+1, col-1));
+            checks.push((row - 1, col - 1));
+            checks.push((row, col - 1));
+            checks.push((row + 1, col - 1));
         }
     }
     if col > 0 {
-        checks.push((row, col-1));
-        checks.push((row+1, col-1));
+        checks.push((row, col - 1));
+        checks.push((row + 1, col - 1));
     }
 
     for check in checks {
@@ -142,7 +146,11 @@ fn parse_symbols(input: &Vec<String>) -> SymbolMap {
     symbols
 }
 
-fn update_gear_ratios(gear_map: &mut HashMap<(usize, usize), (u32, u32)>, gear_coords: &(usize, usize), add_value: u32) {
+fn update_gear_ratios(
+    gear_map: &mut HashMap<(usize, usize), (u32, u32)>,
+    gear_coords: &(usize, usize),
+    add_value: u32,
+) {
     let new_ratio = match gear_map.get(gear_coords) {
         Some((left, _)) => {
             if *left == 0 {
@@ -151,7 +159,7 @@ fn update_gear_ratios(gear_map: &mut HashMap<(usize, usize), (u32, u32)>, gear_c
                 (*left, add_value)
             }
         }
-        None => (add_value, 0)
+        None => (add_value, 0),
     };
     gear_map.insert(*gear_coords, new_ratio);
 }
