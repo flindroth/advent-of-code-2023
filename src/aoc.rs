@@ -18,6 +18,17 @@ pub fn get_input(year: i32, day: i32) -> Result<Vec<String>, AocError> {
     return get_input_from_http_and_cache(year, day);
 }
 
+pub fn get_sample_input(path: &str) -> Result<Vec<String>, AocError> {
+    if Path::exists(Path::new(&path)) {
+        let mut result = Vec::<String>::new();
+        for line in std::fs::read_to_string(path)?.lines() {
+            result.push(line.to_string());
+        }
+        return Ok(result);
+    }
+    Err(AocError::IoError)
+}
+
 pub fn get_input_from_http_and_cache(year: i32, day: i32) -> Result<Vec<String>, AocError> {
     let session_cookie = read_session_cookie()?;
     let url = format!("https://adventofcode.com/{year}/day/{day}/input");
