@@ -35,12 +35,26 @@ fn parse_part_numbers_and_ratios(input: &Vec<String>, symbols: &SymbolMap) -> (V
             }
             // No longer a number
             if let Some(start) = num_start {
-                handle_number_substring(&mut gear_ratios, &mut part_numbers, row, row_num, symbols, (start, idx))
+                handle_number_substring(
+                    &mut gear_ratios,
+                    &mut part_numbers,
+                    row,
+                    row_num,
+                    symbols,
+                    (start, idx),
+                )
             }
             num_start = None;
         }
         if let Some(start) = num_start {
-            handle_number_substring(&mut gear_ratios, &mut part_numbers, row, row_num, symbols, (start, row.len()));
+            handle_number_substring(
+                &mut gear_ratios,
+                &mut part_numbers,
+                row,
+                row_num,
+                symbols,
+                (start, row.len()),
+            );
         }
         row_num += 1;
     }
@@ -152,6 +166,10 @@ fn update_gear_ratios(
     add_value: u32,
 ) {
     let new_ratio = match gear_map.get(gear_coords) {
+        Some((0, 0)) => (add_value, 0),
+        Some((left, 0)) => (*left, add_value),
+        Some((left, right)) => (*left, *right),
+        /*
         Some((left, _)) => {
             if *left == 0 {
                 (add_value, 0)
@@ -159,6 +177,7 @@ fn update_gear_ratios(
                 (*left, add_value)
             }
         }
+        */
         None => (add_value, 0),
     };
     gear_map.insert(*gear_coords, new_ratio);
